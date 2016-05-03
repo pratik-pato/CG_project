@@ -1,0 +1,12 @@
+To run :
+      make : This will create executable for 4 programs.
+
+To execute :
+  ./stick
+  ./bounce
+  ./bouncing_squash
+  ./final_duck
+
+to run parallel lines program : python parallel.py
+
+to run doll.py : python doll.py

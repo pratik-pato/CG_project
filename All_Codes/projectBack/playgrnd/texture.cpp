@@ -1,0 +1,222 @@
+//
+// This code was created by Jeff Molofee '99 (ported to Linux/GLUT by Richard Campbell '99)
+//
+// If you've found this code useful, please let me know.
+//
+// Visit me at [url]www.demonews.com/hosted/nehe[/url]
+// (email Richard Campbell at [email]ulmont@bellsouth.net[/email])
+//
+// YLP 31/05/2011 : modify it for only display a cube
+#include <GL/glut.h>    // Header File For The GLUT Library
+#include <GL/gl.h>// Header File For The OpenGL32 Library
+#include <GL/glu.h>// Header File For The GLu32 Library
+#include <unistd.h>     // needed to sleep
+
+/* ASCII code for the escape key. */
+#define ESCAPE 27
+
+/* The number of our GLUT window */
+int window;
+
+/* rotation angle for the cube. */
+float rcube = 0.0f;
+
+/* Texture */
+GLuint texid;
+GLuint texwidth=2;
+GLuint texheight=2;
+// GLuint texdepth=1;
+GLubyte texData[16] =
+  {
+    0xFF,0x00,0x00,0xFF, // red
+    0x00,0xFF,0x00,0xFF, // rgreen
+    0x00,0x00,0xFF,0xFF, // blue
+    0xFF,0xFF,0xFF,0xFF  // black
+  };
+
+void DrawCube()
+{
+  glColor3f(1.0f,1.0f,1.0f);
+
+  // draw a cube (6 quadrilaterals)
+  glBegin(GL_QUADS);// start drawing the cube.
+
+  // Front Face
+  glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);// Bottom Left Of The Texture and Quad
+  glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f, -1.0f,  1.0f);// Bottom Right Of The Texture and Quad
+  glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f,  1.0f);// Top Right Of The Texture and Quad
+  glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f,  1.0f);// Top Left Of The Texture and Quad
+
+  // Back Face
+  glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);// Bottom Right Of The Texture and Quad
+  glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);// Top Right Of The Texture and Quad
+  glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);// Top Left Of The Texture and Quad
+  glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -1.0f, -1.0f);// Bottom Left Of The Texture and Quad
+
+  // Top Face
+  glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);// Top Left Of The Texture and Quad
+  glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f,  1.0f,  1.0f);// Bottom Left Of The Texture and Quad
+  glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f,  1.0f,  1.0f);// Bottom Right Of The Texture and Quad
+  glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);// Top Right Of The Texture and Quad
+
+  // Bottom Face
+  glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f, -1.0f, -1.0f);// Top Right Of The Texture and Quad
+  glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f, -1.0f, -1.0f);// Top Left Of The Texture and Quad
+  glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -1.0f,  1.0f);// Bottom Left Of The Texture and Quad
+  glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);// Bottom Right Of The Texture and Quad
+
+  // Right face
+  glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f, -1.0f, -1.0f);// Bottom Right Of The Texture and Quad
+  glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);// Top Right Of The Texture and Quad
+  glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f,  1.0f,  1.0f);// Top Left Of The Texture and Quad
+  glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -1.0f,  1.0f);// Bottom Left Of The Texture and Quad
+
+  // Left Face
+  glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);// Bottom Left Of The Texture and Quad
+  glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);// Bottom Right Of The Texture and Quad
+  glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f,  1.0f,  1.0f);// Top Right Of The Texture and Quad
+  glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);// Top Left Of The Texture and Quad
+
+  glEnd();// Done Drawing The Cube
+
+}
+
+void InitTexture()
+{
+
+  // Bind the texture
+  glEnable(GL_TEXTURE_2D);
+  glGenTextures(1,texid);
+  glBindTexture(GL_TEXTURE_2D,texid); //Sélectionne ce n°
+  glTexImage2D (
+		GL_TEXTURE_2D, //Type : texture 2D
+		0, //Mipmap : aucun
+		4, //Couleurs : 4 (red,green,blue,alpha)
+		texwidth, //Largeur : 2
+		texheight, //Hauteur : 2
+		0, //Largeur du bord : 0
+		GL_RGBA, //Format : RGBA
+		GL_UNSIGNED_BYTE, //Type des couleurs
+		texData //Addresse de l'image
+		);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
+
+
+/* A general OpenGL initialization function.  Sets all of the initial parameters. */
+void InitGL(int Width, int Height)        // We call this right after our OpenGL window is created.
+{
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);// This Will Clear The Background Color To Black
+  glClearDepth(1.0);// Enables Clearing Of The Depth Buffer
+  glDepthFunc(GL_LESS);        // The Type Of Depth Test To Do
+  glEnable(GL_DEPTH_TEST);        // Enables Depth Testing
+  glShadeModel(GL_SMOOTH);// Enables Smooth Color Shading
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();// Reset The Projection Matrix
+
+  gluPerspective(45.0f,(GLfloat)Width/(GLfloat)Height,0.1f,100.0f);// Calculate The Aspect Ratio Of The Window
+
+  glMatrixMode(GL_MODELVIEW);
+
+  InitTexture();
+
+
+}
+
+/* The function called when our window is resized (which shouldn't happen, because we're fullscreen) */
+void ReSizeGLScene(int Width, int Height)
+{
+  if (Height==0)// Prevent A Divide By Zero If The Window Is Too Small
+    Height=1;
+
+  glViewport(0, 0, Width, Height);// Reset The Current Viewport And Perspective Transformation
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+
+  gluPerspective(45.0f,(GLfloat)Width/(GLfloat)Height,0.1f,100.0f);
+  glMatrixMode(GL_MODELVIEW);
+}
+
+/* The main drawing function. */
+void DrawGLScene()
+{
+  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);// Clear The Screen And The Depth Buffer
+
+  glLoadIdentity();// Reset the transformation matrix.
+  glTranslatef(0.0f,0.0f,-7.0f);// Move Right 3 Units, and back into the screen 7
+
+  glRotatef(rcube,1.0f,1.0f,1.0f);// Rotate The Cube On X, Y, and Z
+
+  DrawCube();
+
+  rcube-=1.0f;// Decrease The Rotation Variable For The Cube
+
+  // swap the buffers to display, since double buffering is used.
+  glutSwapBuffers();
+}
+
+/* The function called whenever a key is pressed. */
+void keyPressed(unsigned char key, int x, int y)
+{
+  /* avoid thrashing this call */
+  usleep(100);
+
+  /* If escape is pressed, kill everything. */
+  if (key == ESCAPE)
+    {
+      /* shut down our window */
+      glutDestroyWindow(window);
+
+      /* exit the program...normal termination. */
+      exit(0);
+    }
+}
+
+int main(int argc, char **argv)
+{
+  /* Initialize GLUT state - glut will take any command line arguments that pertain to it or 
+     X Windows - look at its documentation at [url]http://reality.sgi.com/mjk/spec3/spec3.html[/url] */
+  glutInit(&argc, argv);
+
+  /* Select type of Display mode:   
+     Double buffer 
+     RGBA color
+     Alpha components supported 
+     Depth buffered for automatic clipping */
+  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_ALPHA | GLUT_DEPTH);
+
+  /* get a 640 x 480 window */
+  glutInitWindowSize(640, 480);
+
+  /* the window starts at the upper left corner of the screen */
+  glutInitWindowPosition(0, 0);
+
+  /* Open a window */
+  window = glutCreateWindow("Jeff Molofee's GL Code Tutorial ... NeHe '99");
+
+  /* Register the function to do all our OpenGL drawing. */
+  glutDisplayFunc(&amp;DrawGLScene);
+
+  /* Go fullscreen.  This is as soon as possible. */
+  glutFullScreen();
+
+  /* Even if there are no events, redraw our gl scene. */
+  glutIdleFunc(&amp;DrawGLScene);
+
+  /* Register the function called when our window is resized. */
+  glutReshapeFunc(&amp;ReSizeGLScene);
+
+  /* Register the function called when the keyboard is pressed. */
+  glutKeyboardFunc(&amp;keyPressed);
+
+  /* Initialize our window. */
+  InitGL(640, 480);
+
+  /* Start Event Processing Engine */
+  glutMainLoop();
+
+  return 1;
+}
