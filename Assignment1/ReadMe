@@ -1,0 +1,13 @@
+To run :
+      make : This will create executable for 5 programs.
+
+To execute :
+  ./stick
+  ./smile
+  ./bounce
+  ./bouncing_squash
+  ./penguin
+
+to run parallel lines program : python parallel.py
+
+to run doll.py : python doll.py
